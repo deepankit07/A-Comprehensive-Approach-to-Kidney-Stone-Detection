@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kidney Stone Prediction - Upload Report</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-image: url('infobg1.jpg'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Report</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="report-file" name="report" accept=".txt,.pdf,.jpg,.png">
+        <button type="button" onclick="uploadReport()">Upload Here</button>
+    </form>
+    <p id="prediction-result"></p>
+    <a href="index.html">Back to Home</a>
+
+    <script src="function.js"></script>
+</body>
+</html>

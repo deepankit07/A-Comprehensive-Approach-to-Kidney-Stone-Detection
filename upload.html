@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kidney Stone Prediction</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url('infobg1.jpg');
+      background-size: cover;
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 400px;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+    }
+
+    input[type="file"] {
+      margin: 1rem 0;
+    }
+
+    button {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    #prediction-result {
+      margin-top: 1.5rem;
+      font-weight: bold;
+      color: #222;
+    }
+
+    #debug-output {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #666;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+    a {
+      display: block;
+      margin-top: 1rem;
+      text-decoration: none;
+      color: #0077cc;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upload Medical Report</h1>
+    <input type="file" id="report-file" accept=".txt,.jpg,.png"/>
+    <br/>
+    <button onclick="analyzeReport()">Upload & Predict</button>
+    <p id="prediction-result"></p>
+    <div id="debug-output"></div>
+    <a href="index.html">⬅ Back to Home</a>
+  </div>
+
+  <script>
+    async function analyzeReport() {
+      const fileInput = document.getElementById('report-file');
+      const resultDisplay = document.getElementById('prediction-result');
+      const debugOutput = document.getElementById('debug-output');
+
+      resultDisplay.innerText = "Analyzing... please wait.";
+      debugOutput.innerText = "";
+
+      if (!fileInput.files.length) {
+        resultDisplay.innerText = "Please select a report file.";
+        return;
+      }
+
+      const file = fileInput.files[0];
+
+      const kidneyStoneKeywords = [
+        "kidney", "stone", "stones", "renal", "calculi", "pain", "flank", "crystals", "hematuria", "ureter", "obstruction"
+      ];
+
+      const analyzeText = (text) => {
+        const lowerText = text.toLowerCase();
+        debugOutput.innerText = "Extracted Text:\n" + lowerText;
+
+        const matches = kidneyStoneKeywords.filter(word => lowerText.includes(word));
+        debugOutput.innerText += `\n\nMatched Keywords:\n${matches.join(", ")}`;
+
+        if (matches.length >= 2) {
+          resultDisplay.innerText = "⚠️ Prediction: Kidney Stones Detected.";
+        } else if (matches.length === 1) {
+          resultDisplay.innerText = "⚠️ Prediction: Possible Sign — Further Review Needed.";
+        } else {
+          resultDisplay.innerText = "✅ Prediction: No Kidney Stones Detected.";
+        }
+      };
+
+      if (file.type.startsWith("image/")) {
+        Tesseract.recognize(file, 'eng', {
+          logger: m => console.log(m)  // optional: progress logging
+        }).then(({ data: { text } }) => {
+          analyzeText(text);
+        }).catch(err => {
+          resultDisplay.innerText = "OCR Error: " + err.message;
+        });
+      } else if (file.type === "text/plain") {
+        const reader = new FileReader();
+        reader.onload = (e) => analyzeText(e.target.result);
+        reader.readAsText(file);
+      } else {
+        resultDisplay.innerText = "Unsupported file type. Please upload a .txt, .jpg, or .png file.";
+      }
+    }
+  </script>
+</body>
+</html>
